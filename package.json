@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --ignore gamers.json indext.mjs"
+    "start": "nodemon --ignore gamers.json indext.js",
+    "test": "nodemon --ignore gamers.json test.js"
   },
   "keywords": [],
   "author": "",
