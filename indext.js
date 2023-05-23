@@ -32,7 +32,7 @@ try {
 
     let data = fs.readFileSync('gamers.json','utf8');
 
-    const store = JSON.parse(data)
+    let store = JSON.parse(data)
 
     // Обработчик для всех входящих сообщений
     bot.on('message', (msg) => {
@@ -90,8 +90,10 @@ try {
                 if (text.includes('перевод')) {
 
                     const txt = text.split(' ')
-                    const Person = store.find(gamer => gamer.username === txt[1].slice(1));
+                    const Person = store.find(gamer => gamer.username.toLowerCase() === txt[1].slice(1));
                     const sum = parseInt(txt[2])
+
+                    console.log(txt[1].slice(1))
 
                     console.log('Перевод от ' + msg.from.username + ' к ' + Person.username +' сумма: ' + sum)
 
@@ -127,6 +129,31 @@ try {
 
                     bot.sendMessage(chatId, top + `\n Денег в казино - ${casino.money}р.\n Денег на джекпот - ${krupie.money}р.`)
 
+                }
+
+                if (text === 'вайп' && msg.from.username === 'b2b_daddy'){
+
+                    store = store.map((function(obj) {
+                        const newObj = { ...obj };
+                        if (newObj.id !== 1 && newObj.id !== 2){
+                            newObj.money = 10000;
+                            newObj.games = 0;
+                            newObj.wins = 0;
+                            newObj.looses = 0;
+                            newObj.rate = 100;
+                        } else {
+                            newObj.money = 0;
+                            newObj.games = 0;
+                            newObj.wins = 0;
+                            newObj.looses = 0;
+                            newObj.rate = 1;
+                        }
+                        return newObj;
+                    }))
+
+                    save(store)
+
+                    bot.sendMessage(chatId, 'Произошёл ВАЙП.\nВсем начисленно по 10к. Статистика сброшена.')
                 }
 
             } catch (e) {}
