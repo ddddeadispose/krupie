@@ -70,10 +70,10 @@ try {
                         У тебя нет таких бабок. У тебя всего ${foundGamer.money} на счету
                         `, { reply_to_message_id: msg.message_id })
 
-                    } else if (rate < 0) {
+                    } else if (rate < 0 || rate < 99) {
 
                         bot.sendMessage(chatId, `
-                        Хуй тебе. Меня теперь не наебать.
+                        Минимальная ставка 100 рублей, если что...
                         `, { reply_to_message_id: msg.message_id })
 
                     } else {
@@ -154,6 +154,7 @@ try {
                     save(store)
 
                     bot.sendMessage(chatId, 'Произошёл ВАЙП.\nВсем начисленно по 10к. Статистика сброшена.')
+
                 }
 
             } catch (e) {}
