@@ -37,19 +37,26 @@ try {
     // Обработчик для всех входящих сообщений
     bot.on('message', (msg) => {
         const chatId = msg.chat.id;
+        const room = -1001985812353;
         let top = 'ТОП ИГРОКОВ:\n';
         const foundGamer = store.find(gamer => gamer.id === msg.from.id);
         const krupie = store.find(gamer => gamer.id === 1); // Объект Крупье
         const casino = store.find(gamer => gamer.id === 2); // Объект казино
+        const secret = Math.round(Math.random()*64)
 
         store.sort(function(a, b) {
             return b.money - a.money;
         });
 
+        if (chatId !== -1001985812353){
+            bot.sendMessage(room, `@${msg.from.username} мутит что-то в ЛС с ботом. Наебка, получается.`)
+        }
+
+
+
         for (let i = 0; i < store.length; i++){
 
             if (store[i].id !== 1 && store[i].id !== 2){
-                console.log(store[i].id)
                 top += `${i+1}. На счету у ${store[i].username} ${store[i].money} рублей. Побед - ${store[i].wins}\n`
             }
 
@@ -93,11 +100,13 @@ try {
                     const Person = store.find(gamer => gamer.username.toLowerCase() === txt[1].slice(1));
                     const sum = parseInt(txt[2])
 
+
+
                     console.log(txt[1].slice(1))
 
                     console.log('Перевод от ' + msg.from.username + ' к ' + Person.username +' сумма: ' + sum)
 
-                    if (foundGamer.money > sum) {
+                    if (foundGamer.money > sum && sum > 0) {
 
                         foundGamer.money = foundGamer.money - sum
                         Person.money = Person.money + sum
@@ -106,7 +115,7 @@ try {
 
                     } else {
 
-                        bot.sendMessage(chatId, 'Недостаточно средств')
+                        bot.sendMessage(chatId, 'Недостаточно средств или неверное значение')
 
                     }
 
@@ -120,7 +129,7 @@ try {
                     const winrate = Math.round((wins/looses)*100)
 
                     bot.sendMessage(chatId, `
-                    Твоя стата:\nПобед - ${wins}, всего сыграл - ${wins+looses} раз. Винрейт - ${winrate}%. Денег у тебя - ${money}р.
+                    Твоя стата:\nПобед - ${wins}, всего сыграл - ${wins+looses} раз. Винрейт - ${winrate}%. Денег у тебя - ${money}р. Твоя ставка - ${foundGamer.rate} р.
                     `, { reply_to_message_id: msg.message_id })
 
                 }
@@ -161,6 +170,18 @@ try {
 
             console.log('Найден');
 
+            if (msg.dice.value === secret){
+
+                setTimeout(() => {
+
+                    bot.sendMessage(chatId, '🔑')
+                    bot.sendMessage(chatId, `ЕБАНУТЬСЯ. @${msg.from.username} ВЫБИЛ МЕГА СЕКРЕТНУЮ ХУЙНЮ. ТЫ ПОЛУЧАЕШЬ ${secret}к рублей от бога`)
+                    foundGamer.money = foundGamer.money + (secret*1000)
+
+                }, 2000);
+
+            }
+
             if (foundGamer.money > 0){
 
                 if (msg.forward_date){
@@ -171,32 +192,47 @@ try {
 
                     if (wins.includes(msg.dice.value)){
 
-                            setTimeout(() => {
-                                console.log('ПОБЕДА')
-                                casino.money = casino.money - (foundGamer.rate * 10)
-                                foundGamer.money = (foundGamer.money - foundGamer.rate) + foundGamer.rate * 10
-                                bot.sendMessage(chatId, '💰')
-                                bot.sendMessage(chatId, `
-                                ХАРОШ! Ты выиграл ${foundGamer.rate * 10}. Теперь у тебя ${foundGamer.money} рублей.
-                                `, { reply_to_message_id: msg.message_id })
-                                foundGamer.wins++
-                                foundGamer.games++
-                            }, 2000);
+                        console.log('ПОБЕДА')
+                        casino.money = casino.money - (foundGamer.rate * 10)
+                        foundGamer.money = (foundGamer.money - foundGamer.rate) + foundGamer.rate * 10
+                        setTimeout(() => {
+                            bot.sendMessage(chatId, '💰')
+                            bot.sendMessage(chatId, `
+                            ХАРОШ! Ты выиграл ${foundGamer.rate * 10}. Теперь у тебя ${foundGamer.money} рублей.
+                            `, { reply_to_message_id: msg.message_id })
+                        }, 2000);
+                        foundGamer.wins++
+                        foundGamer.games++
 
                     } else if (msg.dice.value === jackpot){
 
-                        const sum = krupie.money
-                        foundGamer.money  = foundGamer.money + krupie.money
-                        krupie.money = 0
-                        setTimeout(() => {
-                            console.log('ДЖЕКПОТ')
-                            bot.sendMessage(chatId, '🤑')
-                            bot.sendMessage(chatId, `
-                            ЕБАТЬ ТЫ ВЫБИЛ ДЖЕКПОТ! Лови ${sum}. Теперь у тебя ${foundGamer.money} рублей.
-                            `, { reply_to_message_id: msg.message_id })
-                            foundGamer.wins++
-                            foundGamer.games++
-                        }, 2000);
+                        let sum = krupie.money
+
+                        if (sum < 8000) {
+
+                            casino.money = casino.money - (foundGamer.rate * 10)
+                            foundGamer.money = (foundGamer.money - foundGamer.rate) + foundGamer.rate * 10
+                            setTimeout(() => {
+                                bot.sendMessage(chatId, `
+                                Джекпот пока что меньше 1к, поэтому получи стандартный выигрыш - ${foundGamer.rate * 10}. Теперь у тебя ${foundGamer.money} рублей.`)
+                            }, 2000);
+
+                        } else {
+
+                            foundGamer.money  = foundGamer.money + krupie.money
+                            krupie.money = 0
+                            setTimeout(() => {
+                                console.log('ДЖЕКПОТ')
+                                bot.sendMessage(chatId, '🤑')
+                                bot.sendMessage(chatId, `
+                                ЕБАТЬ ТЫ ВЫБИЛ ДЖЕКПОТ! Лови ${sum}. Теперь у тебя ${foundGamer.money} рублей.
+                                `, { reply_to_message_id: msg.message_id })
+                            }, 2000);
+
+                        }
+
+                        foundGamer.wins++
+                        foundGamer.games++
 
                     } else {
 
@@ -210,9 +246,13 @@ try {
 
                     if (foundGamer.looses % 10 === 0) {
 
-                        bot.sendMessage(chatId, `
-                        Братан, у тебя ${foundGamer.looses} проёбов, а побед - ${foundGamer.wins}. Сейчас у тебя ${foundGamer.money} рублей. Джекпот сейчас составляет - ${krupie.money} рублей.
-                        `, { reply_to_message_id: msg.message_id })
+                        setTimeout(() => {
+
+                            bot.sendMessage(chatId, `
+                            Братан, у тебя ${foundGamer.looses} проёбов, а побед - ${foundGamer.wins}. Сейчас у тебя ${foundGamer.money} рублей. Джекпот сейчас составляет - ${krupie.money} рублей.
+                            `, { reply_to_message_id: msg.message_id })
+
+                        }, 2000);
 
                     }
 
@@ -250,6 +290,7 @@ try {
         console.log(msg.from.username)
 
         save(store)
+
     });
 
 } catch (e) {
