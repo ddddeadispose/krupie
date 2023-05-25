@@ -52,6 +52,7 @@ try {
             bot.sendMessage(room, `@${msg.from.username} мутит что-то в ЛС с ботом. Наебка, получается.`)
         }
 
+
         for (let i = 0; i < store.length; i++){
 
             if (store[i].id !== 1 && store[i].id !== 2){
