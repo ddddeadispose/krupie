@@ -48,9 +48,9 @@ try {
             return b.money - a.money;
         });
 
-        /*if (chatId !== -1001985812353){
+        if (chatId !== -1001985812353){
             bot.sendMessage(room, `@${msg.from.username} мутит что-то в ЛС с ботом. Наебка, получается.`)
-        }*/
+        }
 
         for (let i = 0; i < store.length; i++){
 
